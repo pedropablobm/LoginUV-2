@@ -1,0 +1,23 @@
+﻿# Python
+__pycache__/
+*.pyc
+server/.venv/
+
+# Node
+admin-web/node_modules/
+admin-web/dist/
+
+# Go
+client-agent/bin/
+
+# Env
+.env
+infra/.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
