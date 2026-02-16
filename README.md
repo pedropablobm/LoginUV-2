@@ -16,9 +16,11 @@ LoginUV permite autenticación de estudiantes/docentes en equipos Windows y Debi
 1. Arquitectura técnica y flujo de autenticación.
 2. Modelo de datos SQL inicial.
 3. Contrato de API (endpoints, payloads, errores).
-4. Backlog por fases con criterios de aceptación.
-5. Guía de despliegue en Proxmox y sede alterna.
-6. Estrategia de sincronización con GLPI v11.
+4. OpenAPI (`server/openapi.yaml`).
+5. Migraciones Alembic iniciales.
+6. Backlog por fases con criterios de aceptación.
+7. Guía de despliegue en Proxmox y sede alterna.
+8. Estrategia de sincronización con GLPI v11.
 
 ## Inicio rápido
 ```powershell

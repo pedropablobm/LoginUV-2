@@ -1,0 +1,491 @@
+﻿openapi: 3.1.0
+info:
+  title: LoginUV API
+  version: 0.1.0
+  description: API for authentication, machine control, dashboard and reports.
+servers:
+  - url: http://localhost:8000/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: health
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /auth/login:
+    post:
+      summary: Authenticate user on machine
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '504':
+          $ref: '#/components/responses/Error504'
+  /auth/logout:
+    post:
+      summary: Close active session
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Session closed
+  /client/heartbeat:
+    post:
+      summary: Receive machine heartbeat
+      operationId: heartbeat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '202':
+          description: Accepted
+  /client/events/bulk:
+    post:
+      summary: Receive batch of client events
+      operationId: clientEventsBulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkEventsRequest'
+      responses:
+        '202':
+          description: Accepted
+  /dashboard/summary:
+    get:
+      summary: Dashboard summary metrics
+      operationId: dashboardSummary
+      parameters:
+        - name: campus
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+  /dashboard/labs/{campus_code}/{lab_code}:
+    get:
+      summary: List machine status by lab
+      operationId: dashboardLabStatus
+      parameters:
+        - name: campus_code
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: lab_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Machine list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campus_code:
+                    type: string
+                  lab_code:
+                    type: string
+                  machines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MachineStatus'
+  /users:
+    get:
+      summary: List users
+      operationId: usersList
+      responses:
+        '200':
+          description: Users list
+    post:
+      summary: Create user
+      operationId: usersCreate
+      responses:
+        '201':
+          description: User created
+  /users/{id}:
+    patch:
+      summary: Update user fields
+      operationId: usersPatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User updated
+  /users/import-csv:
+    post:
+      summary: Import users from CSV
+      operationId: usersImportCsv
+      responses:
+        '202':
+          description: Import accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  import_id:
+                    type: integer
+                    format: int64
+                  status:
+                    type: string
+                    example: processing
+  /integrations/glpi/sync:
+    post:
+      summary: Start GLPI synchronization
+      operationId: glpiSync
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [manual, scheduled]
+      responses:
+        '202':
+          description: Sync accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: integer
+                    format: int64
+                  status:
+                    type: string
+                    example: processing
+  /integrations/glpi/sync/{run_id}:
+    get:
+      summary: Get GLPI synchronization status
+      operationId: glpiSyncStatus
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Sync status
+  /reports/usage:
+    get:
+      summary: Usage report
+      operationId: reportUsage
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Campus'
+        - $ref: '#/components/parameters/Lab'
+        - $ref: '#/components/parameters/UserCode'
+        - $ref: '#/components/parameters/Plan'
+        - $ref: '#/components/parameters/Semester'
+        - $ref: '#/components/parameters/Format'
+      responses:
+        '200':
+          description: Report generated
+  /reports/attendance:
+    get:
+      summary: Attendance report
+      operationId: reportAttendance
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Plan'
+        - $ref: '#/components/parameters/Semester'
+        - $ref: '#/components/parameters/UserCode'
+        - $ref: '#/components/parameters/Format'
+      responses:
+        '200':
+          description: Report generated
+components:
+  parameters:
+    From:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date-time
+    To:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date-time
+    Campus:
+      name: campus
+      in: query
+      schema:
+        type: string
+    Lab:
+      name: lab
+      in: query
+      schema:
+        type: string
+    UserCode:
+      name: user_code
+      in: query
+      schema:
+        type: string
+    Plan:
+      name: plan
+      in: query
+      schema:
+        type: string
+    Semester:
+      name: semester
+      in: query
+      schema:
+        type: string
+    Format:
+      name: format
+      in: query
+      schema:
+        type: string
+        enum: [json, pdf, xlsx]
+        default: json
+  responses:
+    Error401:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_CREDENTIALS
+              message: Invalid username or password
+              trace_id: 2f5fa8d7
+    Error404:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: MACHINE_NOT_REGISTERED
+              message: Machine does not exist
+              trace_id: 2f5fa8d7
+    Error409:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: SESSION_LIMIT_REACHED
+              message: User exceeded active sessions
+              trace_id: 2f5fa8d7
+    Error504:
+      description: Gateway timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: AUTH_TIMEOUT
+              message: Authentication timeout exceeded
+              trace_id: 2f5fa8d7
+  schemas:
+    LoginRequest:
+      type: object
+      required: [user_code, password, hostname, campus_code, lab_code]
+      properties:
+        user_code:
+          type: string
+        password:
+          type: string
+        hostname:
+          type: string
+        campus_code:
+          type: string
+        lab_code:
+          type: string
+    SessionInfo:
+      type: object
+      required: [id, user_code, full_name, role, machine, auth_mode]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_code:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [student, teacher, admin]
+        machine:
+          type: string
+        auth_mode:
+          type: string
+          enum: [central, relay]
+    LoginResponse:
+      type: object
+      required: [access_token, token_type, expires_in, session]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: bearer
+        expires_in:
+          type: integer
+          example: 900
+        session:
+          $ref: '#/components/schemas/SessionInfo'
+    LogoutRequest:
+      type: object
+      required: [session_id, reason]
+      properties:
+        session_id:
+          type: integer
+          format: int64
+        reason:
+          type: string
+          enum: [logout, shutdown, unexpected_shutdown, admin_force]
+    HeartbeatRequest:
+      type: object
+      required: [hostname, session_id, os_type, uptime_seconds, timestamp]
+      properties:
+        hostname:
+          type: string
+        session_id:
+          type: integer
+          format: int64
+        os_type:
+          type: string
+          enum: [windows, debian]
+        uptime_seconds:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+    EventItem:
+      type: object
+      required: [type, timestamp, payload]
+      properties:
+        type:
+          type: string
+        session_id:
+          type: integer
+          format: int64
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: true
+    BulkEventsRequest:
+      type: object
+      required: [hostname, events]
+      properties:
+        hostname:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventItem'
+    DashboardSummary:
+      type: object
+      required: [connected_users, machines_occupied, machines_free, alerts, generated_at]
+      properties:
+        connected_users:
+          type: integer
+        machines_occupied:
+          type: integer
+        machines_free:
+          type: integer
+        alerts:
+          type: integer
+        generated_at:
+          type: string
+          format: date-time
+    MachineStatus:
+      type: object
+      required: [hostname, status]
+      properties:
+        hostname:
+          type: string
+        status:
+          type: string
+          enum: [free, occupied, offline, maintenance]
+        user_code:
+          type: string
+          nullable: true
+        session_start:
+          type: string
+          format: date-time
+          nullable: true
+    ErrorItem:
+      type: object
+      required: [code, message, trace_id]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        trace_id:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorItem'
