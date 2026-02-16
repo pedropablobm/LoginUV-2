@@ -6,6 +6,7 @@ cd server
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+copy .env.example .env
 uvicorn app.main:app --reload
 ```
 
@@ -20,3 +21,13 @@ cd server
 $env:DATABASE_URL="postgresql+psycopg://loginuv:loginuv@localhost:5432/loginuv"
 alembic upgrade head
 ```
+
+## Seed data
+```powershell
+cd server
+python scripts/seed.py
+```
+
+Default admin:
+- user: `admin`
+- password: `Admin123*`

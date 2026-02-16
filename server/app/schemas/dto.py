@@ -1,7 +1,7 @@
 ﻿from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LoginRequest(BaseModel):
@@ -45,7 +45,7 @@ class EventItem(BaseModel):
     type: str
     session_id: Optional[int] = None
     timestamp: datetime
-    payload: dict = {}
+    payload: dict = Field(default_factory=dict)
 
 
 class BulkEventsRequest(BaseModel):
