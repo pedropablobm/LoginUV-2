@@ -161,6 +161,46 @@ paths:
         '200':
           description: User updated
   /users/import-csv:
+    get:
+      summary: List CSV imports
+      operationId: usersImportCsvList
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: CSV imports list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    import_id:
+                      type: integer
+                      format: int64
+                    filename:
+                      type: string
+                    status:
+                      type: string
+                      enum: [processing, success, partial, failed]
+                    started_at:
+                      type: string
+                      format: date-time
+                    ended_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    summary:
+                      type: object
+                      additionalProperties: true
     post:
       summary: Import users from CSV
       operationId: usersImportCsv
@@ -178,7 +218,122 @@ paths:
                   status:
                     type: string
                     example: processing
+                  summary:
+                    type: object
+                    additionalProperties: true
+  /users/import-csv/{import_id}:
+    get:
+      summary: Get CSV import detail
+      operationId: usersImportCsvDetail
+      parameters:
+        - name: import_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: CSV import detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  import_id:
+                    type: integer
+                    format: int64
+                  filename:
+                    type: string
+                  status:
+                    type: string
+                    enum: [processing, success, partial, failed]
+                  started_at:
+                    type: string
+                    format: date-time
+                  ended_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  summary:
+                    type: object
+                    additionalProperties: true
+                  error_rows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        row_number:
+                          type: integer
+                        error_message:
+                          type: string
+                        raw_data:
+                          type: object
+                          additionalProperties: true
+        '404':
+          description: Import not found
+  /users/import-csv/{import_id}/errors.csv:
+    get:
+      summary: Download CSV import errors
+      operationId: usersImportCsvErrorsDownload
+      parameters:
+        - name: import_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Error rows as CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          description: Import not found
   /integrations/glpi/sync:
+    get:
+      summary: List GLPI synchronization runs
+      operationId: glpiSyncList
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Runs list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    run_id:
+                      type: integer
+                      format: int64
+                    mode:
+                      type: string
+                      enum: [manual, scheduled]
+                    status:
+                      type: string
+                      enum: [processing, success, partial, failed]
+                    started_at:
+                      type: string
+                      format: date-time
+                    ended_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    summary:
+                      type: object
+                      additionalProperties: true
     post:
       summary: Start GLPI synchronization
       operationId: glpiSync

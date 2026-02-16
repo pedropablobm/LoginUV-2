@@ -1,0 +1,9 @@
+{
+  "api_base_url": "http://SERVER_IP:8000",
+  "relay_base_url": "http://RELAY_IP:18000",
+  "campus_code": "SEDE_CENTRAL",
+  "lab_code": "LAB-1",
+  "hostname": "PC-001",
+  "request_timeout_seconds": 5,
+  "heartbeat_interval_seconds": 30
+}

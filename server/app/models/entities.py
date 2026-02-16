@@ -111,3 +111,43 @@ class Event(Base):
     event_type: Mapped[str] = mapped_column(String(40), nullable=False)
     payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class CsvImport(Base):
+    __tablename__ = "csv_imports"
+    __table_args__ = (CheckConstraint("status IN ('processing','success','partial','failed')", name="ck_csv_imports_status"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    imported_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    filename: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="processing")
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    summary: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class CsvImportRow(Base):
+    __tablename__ = "csv_import_rows"
+    __table_args__ = (CheckConstraint("row_status IN ('ok','error','skipped')", name="ck_csv_import_rows_row_status"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    import_id: Mapped[int] = mapped_column(ForeignKey("csv_imports.id"), nullable=False)
+    row_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    row_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_data: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class GlpiSyncRun(Base):
+    __tablename__ = "glpi_sync_runs"
+    __table_args__ = (
+        CheckConstraint("run_type IN ('manual','scheduled')", name="ck_glpi_sync_runs_run_type"),
+        CheckConstraint("status IN ('processing','success','partial','failed')", name="ck_glpi_sync_runs_status"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    run_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="processing")
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    summary: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)

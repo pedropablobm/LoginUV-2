@@ -84,6 +84,15 @@ Response 202.
 ### POST `/users/import-csv`
 Retorna resumen y errores por fila.
 
+### GET `/users/import-csv`
+Lista historial de importaciones CSV.
+
+### GET `/users/import-csv/{import_id}`
+Detalle de una importación con filas en error.
+
+### GET `/users/import-csv/{import_id}/errors.csv`
+Descarga las filas con error en formato CSV.
+
 ## GLPI
 ### POST `/integrations/glpi/sync`
 Request:
@@ -94,6 +103,9 @@ Response:
 ```json
 {"run_id": 90, "status": "processing"}
 ```
+
+### GET `/integrations/glpi/sync`
+Lista historial de ejecuciones de sincronización.
 
 ### GET `/integrations/glpi/sync/{run_id}`
 Estado y resumen.

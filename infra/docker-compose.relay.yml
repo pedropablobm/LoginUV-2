@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: loginuv-postgres
+    container_name: loginuv-relay-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -13,28 +13,28 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - relay_postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
-    container_name: loginuv-redis
+    container_name: loginuv-relay-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
-      - redis_data:/data
+      - relay_redis_data:/data
 
-  api:
+  relay-api:
     build:
       context: ../server
       dockerfile: Dockerfile
-    container_name: loginuv-api
+    container_name: loginuv-relay-api
     restart: unless-stopped
     environment:
-      ENV: ${ENV}
+      ENV: relay
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
@@ -56,20 +56,8 @@ services:
       timeout: 5s
       retries: 6
     ports:
-      - "8000:8000"
-
-  web:
-    build:
-      context: ../admin-web
-      dockerfile: Dockerfile
-    container_name: loginuv-web
-    restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
-    ports:
-      - "8080:80"
+      - "18000:8000"
 
 volumes:
-  postgres_data:
-  redis_data:
+  relay_postgres_data:
+  relay_redis_data:

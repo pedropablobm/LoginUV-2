@@ -12,6 +12,14 @@ uvicorn app.main:app --reload
 
 API docs: `http://localhost:8000/docs`
 
+## GLPI sync environment
+Set these variables in `.env` to enable real GLPI synchronization:
+- `GLPI_BASE_URL`
+- `GLPI_APP_TOKEN`
+- `GLPI_USER_TOKEN`
+- `GLPI_VERIFY_SSL` (`true`/`false`)
+- `GLPI_TIMEOUT_SECONDS`
+
 ## OpenAPI contract
 - Source file: `server/openapi.yaml`
 

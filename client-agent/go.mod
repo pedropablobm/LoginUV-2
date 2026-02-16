@@ -1,3 +1,3 @@
-﻿module loginuv/client-agent
+module loginuv/client-agent
 
 go 1.23

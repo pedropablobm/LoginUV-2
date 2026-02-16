@@ -9,6 +9,7 @@ admin-web/dist/
 
 # Go
 client-agent/bin/
+client-agent/dist/
 
 # Env
 .env

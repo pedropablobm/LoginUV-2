@@ -29,6 +29,11 @@ copy .env.example .env
 docker compose up -d --build
 ```
 
+Despliegue por sitio en Proxmox:
+- Sitio central: `infra/docker-compose.yml` + `infra/.env.central.example`
+- Sede alterna (relay): `infra/docker-compose.relay.yml` + `infra/.env.relay.example`
+- Guía: `docs/05-despliegue-proxmox.md`
+
 Servicios esperados:
 - API: `http://localhost:8000`
 - Web admin: `http://localhost:5173` (modo dev) o `http://localhost:8080` (contenedor)
@@ -52,6 +57,9 @@ LoginUV/
   infra/
   server/
 ```
+
+Guía de clientes:
+- `docs/10-clientes.md`
 
 ## Próximos pasos sugeridos
 1. Completar autenticación con hash Argon2 y JWT.
